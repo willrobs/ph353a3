@@ -32,10 +32,13 @@ def data(spring_const,mass,lattice_spacing,num_config,num_lat_points):
 
         state=metro(state,points,0) #### config,num_lat_points
     sum1=0
-    for h in range(int(points - 1)):
+    for h in range(int(points)):
         f.write(str(state[h]) + '\n')
-        sum1=sum1+(state[h+1]-state[h])**2 + state[h]**2
-    sum1=sum1+(state[0]-state[points-1])**2 + state[points-1]**2 ####boundary conds
+        if h== (points-1):
+            sum1=sum1+(state[0]-state[points-1])**2 + state[points-1]**2 ####boundary conds
+        else:
+            sum1=sum1+(state[h+1]-state[h])**2 + state[h]**2
+    
     g.write(str(sum1) + '\n')
         
         
@@ -45,7 +48,7 @@ def data(spring_const,mass,lattice_spacing,num_config,num_lat_points):
         array=metro(state,points,action) #### config,num_lat_points
         state=array[0]
         action=array[1]
-        for h in range(int(points - 1)):
+        for h in range(int(points)):
             f.write(str(state[h]) + '\n') 
         g.write(str(action) + '\n')
         
