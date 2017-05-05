@@ -82,7 +82,6 @@ def reweighting(spring_const,mass,lattice_spacing,num_config,num_lat_points,mass
         sum1=sum1+(i-boot_av_num)**2
         
     std_num=((1/bootstraps)*sum1)**0.5
-    print(std_num)
     #### denominator
     boot_ests=[]
     for i in range(bootstraps):
@@ -102,8 +101,7 @@ def reweighting(spring_const,mass,lattice_spacing,num_config,num_lat_points,mass
     for i in boot_ests:
         sum1=sum1+(i-boot_av_dnm)**2
         
-    std_dnm=((1/bootstraps)*sum1)**0.5
-    print(std_dnm)    
+    std_dnm=((1/bootstraps)*sum1)**0.5 
         
     energy=(mu**2)*(boot_av_num/boot_av_dnm)
     std=abs(energy)*((std_num/boot_av_num)**2 + (std_dnm/boot_av_dnm)**2)**0.5
@@ -114,43 +112,107 @@ def reweighting(spring_const,mass,lattice_spacing,num_config,num_lat_points,mass
 ############################################################### fee    
     num=[]
     dnm=[]
+    b_num=[]
+    b_dnm=[]
     for m in range(corrt):
-
-        sum1=0
-        sum2=0
-        for n in range(niter):
-
-            x0=eval(data[n*points])
-            xnm1=eval(data[n*points + m])
-            xn=eval(data[n*points + m+1])
-            
-            t1=c1p*ssps.delx2[n]
-            t2=c2p*ssps.x2[n]
-            
-            sum1=sum1+(x0*xn)*np.exp(t1 + t2)
-            sum2=sum2+(x0*xnm1)*np.exp(t1 + t2)
-
-        num=np.append(num, sum1/niter)
-        dnm=np.append(dnm, sum2/niter)
         
-    effe=-(1/a)*np.log(num/dnm)
+        for h in range(num_bins):
+            
+
+            sum1=0
+            sum2=0
+            for n in range(bin_size):
+
+                x0=eval(data[(n + h*bin_size)*points])
+                xnm1=eval(data[(n + h*bin_size)*points + m])
+                xn=eval(data[(n + h*bin_size)*points + m+1])
+
+                t1=c1p*ssps.delx2[n]
+                t2=c2p*ssps.x2[n]
+
+                sum1=sum1+(x0*xn)*np.exp(t1 + t2)
+                sum2=sum2+(x0*xnm1)*np.exp(t1 + t2)
+
+            b_num=np.append(b_num, sum1/bin_size) ####binned data point to calc effe(tlat)
+            b_dnm=np.append(b_dnm, sum2/bin_size)
+######## bootstrapping
+    num_error=[]
+    dnm_error=[]
+    num=[]
+    dnm=[]
+    effe=[]
+    y_error=[]
+    for i in range(corrt):
+        bdps_num_hold=b_num[i*num_bins:(i+1)*num_bins] ####creates an array holding all binned data points for a given tlat
+        boot_avg=[]
+        for k in range(bootstraps):
+
+            random_sample=np.random.choice(bdps_num_hold,num_bins)
+            sum1=0
+            for i in random_sample:
+                sum1=sum1+i
+            sum1=sum1/num_bins
+            boot_avg=np.append(boot_avg,sum1) ####array holding all bootstrap values for numerator
+        sum1=0    
+
+        for i in boot_avg:
+            sum1=sum1+i
+        avg=sum1/bootstraps ####calculates bootstrap average
+        num=np.append(num,avg) ####bootstrap average value
+        sum1=0
+        for i in boot_avg:
+            sum1=sum1+(i-avg)**2
+
+        std=((1/bootstraps)*sum1)**0.5
+
+        num_error=np.append(num_error,std)
+        
+    for j in range(corrt):
+        bdps_dnm_hold=b_dnm[j*num_bins:(j+1)*num_bins]
+        boot_avg=[]
+        for k in range(bootstraps):
+
+            random_sample=np.random.choice(bdps_dnm_hold,num_bins)
+            sum1=0
+            for i in random_sample:
+                sum1=sum1+i
+            sum1=sum1/num_bins
+            boot_avg=np.append(boot_avg,sum1)
+        sum1=0    
+        for i in boot_avg:
+            sum1=sum1+i
+        avg=sum1/bootstraps
+        dnm=np.append(dnm,avg)
+        sum1=0
+        for i in boot_avg:
+            sum1=sum1+(i-avg)**2
+
+        std=((1/bootstraps)*sum1)**0.5
+
+        dnm_error=np.append(dnm_error,std)
+        
+    for q in range(corrt):
+
+        err=abs(num[q]/dnm[q])*((num_error[q]/num[q])**2 + (dnm_error[q]/dnm[q])**2)**0.5
+        y_error=np.append(y_error,err)
+        
+        
+    err=(1/a)*np.log(y_error)
+    effe=(-1/a)*np.log(num/dnm)
     
-    lat_time=np.arange(0,len(effe),1)
-    
-    plt.figure(3)
-    plt.xlabel('Lattice time')
-    plt.ylabel('Energy gap')
-    plt.title('Determining plateau')
-    plt.plot(lat_time, effe)
+    lat_time2=np.arange(corrt)
+    plt.figure(1)
+    plt.errorbar(lat_time2,effe,yerr=y_error,fmt='.')
+    plt.plot(lat_time2,effe,'r')
     ediff=(9*mu**2/(4*mass))**0.5 - (mu**2/(4*mass))**0.5
-    plt.plot([0,max(lat_time)],[ediff,ediff])
+    plt.plot([0,max(lat_time2)],[ediff,ediff],'b')
     plt.show()
     
 
 num_config=int(sys.argv[1])
 num_lat_points=int(sys.argv[2])
 lattice_spacing=float(sys.argv[3])
-corrt=int(sys.argv[4])
+corrt=int(sys.argv[4]) #### distance in fee calculation
 bootstraps=int(sys.argv[5])
 mass_prime=float(sys.argv[6])
 spring_const_prime=float(sys.argv[7])
