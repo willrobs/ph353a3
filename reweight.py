@@ -6,8 +6,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas
+import time
+from scipy.optimize import curve_fit
 import sys
 
+def constant(x,c):
+    return c
 
 def reweighting(spring_const,mass,lattice_spacing,num_config,num_lat_points,mass_prime,spring_const_prime,corrt,bootstraps):
     mu=spring_const
@@ -207,6 +211,31 @@ def reweighting(spring_const,mass,lattice_spacing,num_config,num_lat_points,mass
     ediff=(9*mu**2/(4*mass))**0.5 - (mu**2/(4*mass))**0.5
     plt.plot([0,max(lat_time2)],[ediff,ediff],'b')
     plt.show()
+    
+    done='n'
+    while done=='n':
+    
+        plateau=int(input("Enter the point where the plateau occurs: "))
+        effe_hold=effe[0:plateau]
+        lat_time2_hold=lat_time2[0:plateau]
+        y_error_hold=y_error[0:plateau]
+        popt, pcov = curve_fit(constant, lat_time2_hold, effe_hold)
+        plt.figure(2)
+        plt.xlabel('Lattice time')
+        plt.ylabel('Energy gap')
+        plt.title('Fitted energy gap')
+        yaxis=0*np.arange(len(lat_time2_hold))
+        yaxis=yaxis+popt[0]
+        plt.plot(lat_time2_hold, yaxis,'g')
+        plt.errorbar(lat_time2_hold,effe_hold,yerr=y_error_hold,fmt='.')
+        plt.plot(lat_time2_hold,effe_hold,'r')
+        plt.plot([0,max(lat_time2_hold)],[ediff,ediff],'b')
+        plt.show()
+
+        done=input("Enter 'y' if you are happy with your fit, if not enter 'n'")
+        time.sleep(0.1)
+    
+    
     
 
 num_config=int(sys.argv[1])
