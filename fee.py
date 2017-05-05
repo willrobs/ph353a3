@@ -44,15 +44,15 @@ def fee(num_config,num_lat_points,lattice_spacing,corr_dist,bootstraps,mass,spri
     g=open('info'+name+'.txt', 'r')
     bin_size=eval(g.readline())
     g.close()
-    #num_bins=int(len(data)/(bin_size*points))
     num_bins=int(niter/bin_size)
 
-    sum2=0
+    #sum2=0
     for j in range(corr_dist):
         b_num=np.append(b_num,0)
         b_dnm=np.append(b_dnm,0)
         for g in range(num_bins):
             sum1=0
+            sum2=0
             for n in range(bin_size):
 
                 x0=eval(data[(g*bin_size +n)*points])
@@ -136,29 +136,38 @@ def fee(num_config,num_lat_points,lattice_spacing,corr_dist,bootstraps,mass,spri
     plt.errorbar(lat_time2,effe,yerr=y_error,fmt='.')
     plt.plot(lat_time2,effe,'r')
     ediff=(9*mu**2/(4*mass))**0.5 - (mu**2/(4*mass))**0.5
-    plt.plot([0,max(lat_time2)],[ediff,ediff])
+    plt.plot([0,max(lat_time2)],[ediff,ediff],'b')
     plt.show()
 
     done='n'
-    #while done=='n':
+    while done=='n':
     
-        #plateau=int(input("Enter the point where the plateau occurs: "))
-        #effe_hold=effe[0:plateau]
-        #lat_time2_hold=lat_time2[0:plateau]
-        #popt, pcov = curve_fit(constant, lat_time2_hold, effe_hold)
-        #plt.figure(2)
-        #plt.xlabel('Lattice time')
-        #plt.ylabel('Energy gap')
-        #plt.title('Fitted energy gap')
-        #yaxis=0*np.arange(len(lat_time2_hold))
-        #yaxis=yaxis+popt[0]
-        #plt.plot(lat_time2_hold, yaxis)
-        #plt.plot(lat_time2_hold, effe_hold)
-        #plt.plot([0,max(lat_time2)],[ediff,ediff])
-        #plt.show()
+        plateau=int(input("Enter the point where the plateau occurs: "))
+        effe_hold=effe[0:plateau]
+        lat_time2_hold=lat_time2[0:plateau]
+        y_error_hold=y_error[0:plateau]
+        popt, pcov = curve_fit(constant, lat_time2_hold, effe_hold)
+        
+        plt.figure(2)
+        plt.xlabel('Lattice time')
+        plt.ylabel('Energy gap')
+        plt.title('Fitted energy gap')
+        yaxis=0*np.arange(len(lat_time2_hold))
+        yaxis=yaxis+popt[0]
+        
+        fit, = plt.plot(lat_time2_hold, yaxis,'g', label='line1')
+        plt.errorbar(lat_time2_hold,effe_hold,yerr=y_error_hold,fmt='.')
+        plt.plot(lat_time2_hold,effe_hold,'r')
+        analyitic, = plt.plot([0,max(lat_time2_hold)],[ediff,ediff],'b', label='line2')
+        plt.legend([fit, analyitic], ['Fitted line', 'Analytical'])
+        plt.show()
 
-        #done=input("Enter 'y' if you are happy with your fit, if not enter 'n'")
-        #time.sleep(0.1)
+        done=input("Enter 'y' if you are happy with your fit, if not enter 'n'")
+        time.sleep(0.1)
+    perr=np.sqrt(np.diag(pcov))
+    g=open('info'+name+'.txt', 'a')
+    g.write(str( (spring_const**2/(4*mass))**0.5 + popt[0]) + '\t' + str(perr[0]) + '\n')
+    g.close()
         
 num_config=int(sys.argv[1])
 points=int(sys.argv[2])
