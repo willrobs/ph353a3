@@ -26,42 +26,47 @@ def data(spring_const,mass,lattice_spacing,num_config,num_lat_points):
     
     state=0*np.random.random_sample((points,)) #### Initial state
     f=open('data'+name+'.txt' , 'w')
-    g=open('action'+name+'.txt', 'w') #### stores the unit action for each configuration
+    g=open('action'+name+'.txt', 'w') #### stores relevant action terms for each configuration to use in reweighting
+    g.write('delx2' + '\t' + 'x2')
     
     for m in range(ttime): #### thermalizaing state
 
-        state=metro(state,points,0) #### config,num_lat_points
+        state=metro(state,points,0,0) #### config,num_lat_points
     sum1=0
-    for h in range(int(points)):
+    sum2=0
+    for h in range(points):
         f.write(str(state[h]) + '\n')
+        
         if h== (points-1):
-            sum1=sum1+(state[0]-state[points-1])**2 + state[points-1]**2 ####boundary conds
+            sum1=sum1+(state[0]-state[points-1])**2  ####boundary conds
+            sum2=sum2+(state[points-1])**2
         else:
-            sum1=sum1+(state[h+1]-state[h])**2 + state[h]**2
+            sum1=sum1+(state[h+1]-state[h])**2
+            sum2=sum2+(state[h])**2
     
-    g.write(str(sum1) + '\n')
-        
-        
-    action=sum1
+    g.write('\n' + str(sum1) + '\t' + str(sum2))
+
+    delx2=sum1
+    x2=sum2
     for m in range(niter):
 
-        array=metro(state,points,action) #### config,num_lat_points
+        array=metro(state,points,delx2,x2) #### config,num_lat_points
         state=array[0]
-        action=array[1]
+        delx2=array[1]
+        x2=array[2]
         for h in range(int(points)):
             f.write(str(state[h]) + '\n') 
-        g.write(str(action) + '\n')
+        g.write('\n' + str(delx2) + '\t' + str(x2))
         
     f.close()
     g.close()
     print("Raw data gathered.")
     
-def metro(config,num_lat_points,tot_action):
+def metro(config,num_lat_points,delx2,x2):
     
     state=config
     points=num_lat_points
-    action=tot_action
-    if tot_action==0:
+    if delx2 ==0 and x2 ==0:
         skip=True
     else:
         skip=False
@@ -73,7 +78,11 @@ def metro(config,num_lat_points,tot_action):
             delta=daction(state[n+1],state[n],state[points-1],x_t)
 
             if np.exp(-delta)> (np.random.uniform(0,1)):
-                action=action+(x_t-state[n])*(3*(x_t+state[n]) -2*(state[points-1] + state[n+1])) ###bcs
+                delx=x_t-state[n]
+                sx=x_t+state[n]
+                delx2=delx2+ (2*delx)*(sx - (state[n+1] + state[points-1]))###bcs
+                x2=x2+ x_t**2 - (state[n])**2
+                
                 np.put(state,[n],[x_t])
             else:
                 pass
@@ -82,7 +91,11 @@ def metro(config,num_lat_points,tot_action):
             delta=daction(state[0],state[n],state[n-1],x_t)
 
             if np.exp(-delta)> (np.random.uniform(0,1)):
-                action=action+(x_t-state[n])*(3*(x_t+state[n]) -2*(state[n-1] + state[0])) #### bcs
+                delx=x_t-state[n]
+                sx=x_t+state[n]
+                delx2=delx2+ (2*delx)*(sx - (state[0] + state[points-1]))###bcs
+                x2=x2+ x_t**2 - (state[n])**2 #### bcs
+                
                 np.put(state,[n],[x_t])
             else:
                 pass
@@ -90,7 +103,11 @@ def metro(config,num_lat_points,tot_action):
             delta=daction(state[n+1],state[n],state[n-1],x_t)
 
             if  np.exp(-delta) > (np.random.uniform(0,1)):
-                action=action+(x_t-state[n])*(3*(x_t+state[n]) -2*(state[n-1] + state[n+1]))
+                delx=x_t-state[n]
+                sx=x_t+state[n]
+                delx2=delx2+ (2*delx)*(sx - (state[n+1] + state[points-1]))###bcs
+                x2=x2+ x_t**2 - (state[n])**2
+                
                 np.put(state,[n],[x_t])
             else:
                 pass
@@ -98,7 +115,7 @@ def metro(config,num_lat_points,tot_action):
         return(state)
     
     else:
-        return(state,action)
+        return(state,delx2,x2)
     
 def daction(x1,x,xm1,xp):
     dxn=xp-x
