@@ -78,11 +78,14 @@ def metro(config,num_lat_points,delx2,x2):
             delta=daction(state[n+1],state[n],state[points-1],x_t)
 
             if np.exp(-delta)> (np.random.uniform(0,1)):
-                delx=x_t-state[n]
-                sx=x_t+state[n]
-                delx2=delx2+ (2*delx)*(sx - (state[n+1] + state[points-1]))###bcs
-                x2=x2+ x_t**2 - (state[n])**2
                 
+                t1=(state[0] - state[points-1])**2
+                t2=(state[1]-state[0])**2
+                t3=(x_t-state[points-1])**2
+                t4=(state[1]-x_t)**2
+                delx2=delx2-(t1+t2)+t3+t4
+                x2=x2-(state[0])**2 + x_t**2
+                 
                 np.put(state,[n],[x_t])
             else:
                 pass
@@ -91,10 +94,13 @@ def metro(config,num_lat_points,delx2,x2):
             delta=daction(state[0],state[n],state[n-1],x_t)
 
             if np.exp(-delta)> (np.random.uniform(0,1)):
-                delx=x_t-state[n]
-                sx=x_t+state[n]
-                delx2=delx2+ (2*delx)*(sx - (state[0] + state[points-1]))###bcs
-                x2=x2+ x_t**2 - (state[n])**2 #### bcs
+                
+                t1=(state[points-1] - state[points-2])**2
+                t2=(state[0]-state[points-1])**2
+                t3=(x_t-state[points-2])**2
+                t4=(state[0]-x_t)**2
+                delx2=delx2-(t1+t2)+t3+t4
+                x2=x2-(state[points-1])**2 + x_t**2
                 
                 np.put(state,[n],[x_t])
             else:
@@ -103,10 +109,13 @@ def metro(config,num_lat_points,delx2,x2):
             delta=daction(state[n+1],state[n],state[n-1],x_t)
 
             if  np.exp(-delta) > (np.random.uniform(0,1)):
-                delx=x_t-state[n]
-                sx=x_t+state[n]
-                delx2=delx2+ (2*delx)*(sx - (state[n+1] + state[points-1]))###bcs
-                x2=x2+ x_t**2 - (state[n])**2
+                
+                t1=(state[n] - state[n-1])**2
+                t2=(state[n+1]-state[n])**2
+                t3=(x_t-state[n-1])**2
+                t4=(state[n+1]-x_t)**2
+                delx2=delx2-(t1+t2)+t3+t4
+                x2=x2-(state[n])**2 + x_t**2
                 
                 np.put(state,[n],[x_t])
             else:
