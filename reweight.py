@@ -9,7 +9,7 @@ import pandas
 import sys
 
 
-def reweighting(spring_const,mass,lattice_spacing,num_config,num_lat_points,mass_prime,spring_const_prime,corrt):
+def reweighting(spring_const,mass,lattice_spacing,num_config,num_lat_points,mass_prime,spring_const_prime,corrt,bootstraps):
     mu=spring_const
     m=mass
     a=lattice_spacing
@@ -58,18 +58,60 @@ def reweighting(spring_const,mass,lattice_spacing,num_config,num_lat_points,mass
                 
                 sum1=sum1+ ((eval(data[h + (j + g*bin_size)*points]))**2)*np.exp(t1 + t2)
         
-        energies=np.append(energies, sum1/(points*bin_size))
+        energies=np.append(energies, sum1/(points*bin_size)) ####not actually the energies
         essp=np.append(essp,sum2/bin_size)
-    sum1=0
-    sum2=0
-    for t in energies:
-        sum1=sum1+t
-    for u in essp:
-        sum2=sum2+u
+    
+    ####Bootstrap errors and bootstrap estimate
+    #### numerator
+    boot_ests=[]
+    for i in range(bootstraps):
         
-    energy=(mu**2)*(sum1/sum2)
+        random_sample=np.random.choice(energies,num_bins)
+        sum1=0
+        for j in random_sample:
+            sum1=sum1+j
+        sum1=sum1/num_bins
+        boot_ests=np.append(boot_ests,sum1)
+    sum1=0    
+    for i in boot_ests:
+        sum1=sum1+i
+        
+    boot_av_num=sum1/bootstraps
+    sum1=0
+    for i in boot_ests:
+        sum1=sum1+(i-boot_av_num)**2
+        
+    std_num=((1/bootstraps)*sum1)**0.5
+    print(std_num)
+    #### denominator
+    boot_ests=[]
+    for i in range(bootstraps):
+        
+        random_sample=np.random.choice(essp,num_bins)
+        sum1=0
+        for j in random_sample:
+            sum1=sum1+j
+        sum1=sum1/num_bins
+        boot_ests=np.append(boot_ests,sum1)
+    sum1=0    
+    for i in boot_ests:
+        sum1=sum1+i
+        
+    boot_av_dnm=sum1/bootstraps
+    sum1=0
+    for i in boot_ests:
+        sum1=sum1+(i-boot_av_dnm)**2
+        
+    std_dnm=((1/bootstraps)*sum1)**0.5
+    print(std_dnm)    
+        
+    energy=(mu**2)*(boot_av_num/boot_av_dnm)
+    std=abs(energy)*((std_num/boot_av_num)**2 + (std_dnm/boot_av_dnm)**2)**0.5
     
     print('reweighted energy', energy)
+    print('uncertainty', std)
+    
+############################################################### fee    
     num=[]
     dnm=[]
     for m in range(corrt):
@@ -109,12 +151,13 @@ num_config=int(sys.argv[1])
 num_lat_points=int(sys.argv[2])
 lattice_spacing=float(sys.argv[3])
 corrt=int(sys.argv[4])
-mass_prime=float(sys.argv[5])
-spring_const_prime=float(sys.argv[6])
+bootstraps=int(sys.argv[5])
+mass_prime=float(sys.argv[6])
+spring_const_prime=float(sys.argv[7])
 
-m=float(sys.argv[7])
-mu=float(sys.argv[8])
+m=float(sys.argv[8])
+mu=float(sys.argv[9])
 
 
 
-reweighting(mu,m,lattice_spacing,num_config,num_lat_points,mass_prime,spring_const_prime,corrt)
+reweighting(mu,m,lattice_spacing,num_config,num_lat_points,mass_prime,spring_const_prime,corrt,bootstraps)
