@@ -265,8 +265,12 @@ mu_interval=float(sys.argv[6])
 mu_upp_lim=float(sys.argv[7])
 mu_low_lim=float(sys.argv[8])
 
-m=float(sys.argv[9])
-mu=float(sys.argv[10])
+m_interval=float(sys.argv[9])
+m_upp_lim=float(sys.argv[10])
+m_low_lim=float(sys.argv[11])
+
+m=float(sys.argv[12])
+mu=float(sys.argv[13])
 mass_prime=m
 spring_const_prime=mu
 
@@ -277,6 +281,25 @@ for d in range(mu_upi):
     spring_const_prime=mu+(d+1)*mu_interval
     
     reweighting(mu,m,lattice_spacing,num_config,num_lat_points,mass_prime,spring_const_prime,corrt,bootstraps)
+
+for d in range(mu_loi):
+    spring_const_prime=mu -(d+1)*mu_interval
+    
+    
+m_upi=int(m_upp_lim/m_interval)
+m_loi=int(m_low_lim/m_interval)
+
+for d in range(m_upi):
+    mass_prime=m + (d+1)*m_interval
+    
+    reweighting(mu,m,lattice_spacing,num_config,num_lat_points,mass_prime,spring_const_prime,corrt,bootstraps)
+
+for d in range(m_loi):
+    mass_prime=m - (d+1)*m_interval
+    
+    reweighting(mu,m,lattice_spacing,num_config,num_lat_points,mass_prime,spring_const_prime,corrt,bootstraps)
+    
+    
                     
                                            
 
