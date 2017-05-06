@@ -30,6 +30,11 @@ def reweighting(spring_const,mass,lattice_spacing,num_config,num_lat_points,mass
     sniter=str(sniter)
     spoints=str(spoints)
     name=smu+sm+sma+sniter+spoints
+    smup=spring_const_prime,
+    smp=mass_prime,
+    smup=str(smup)
+    smp=str(smp)
+    namep=smup+smp+sma+sniter+spoints
     
     g=open('info'+name+'.txt', 'r')
     bin_size=eval(g.readline())
@@ -112,6 +117,10 @@ def reweighting(spring_const,mass,lattice_spacing,num_config,num_lat_points,mass
     
     print('reweighted energy', energy)
     print('uncertainty', std)
+    
+    g=open('info'+namep+'.txt', 'w')
+    g.write('n/a' + '\n')
+    g.write(str(energy) + '\t' + str(std) + '\n')
     
 ############################################################### fee    
     num=[]
@@ -220,23 +229,27 @@ def reweighting(spring_const,mass,lattice_spacing,num_config,num_lat_points,mass
         lat_time2_hold=lat_time2[0:plateau]
         y_error_hold=y_error[0:plateau]
         popt, pcov = curve_fit(constant, lat_time2_hold, effe_hold)
+        
         plt.figure(2)
         plt.xlabel('Lattice time')
         plt.ylabel('Energy gap')
         plt.title('Fitted energy gap')
         yaxis=0*np.arange(len(lat_time2_hold))
         yaxis=yaxis+popt[0]
-        plt.plot(lat_time2_hold, yaxis,'g')
+        fit, = plt.plot(lat_time2_hold, yaxis,'g')
         plt.errorbar(lat_time2_hold,effe_hold,yerr=y_error_hold,fmt='.')
         plt.plot(lat_time2_hold,effe_hold,'r')
-        plt.plot([0,max(lat_time2_hold)],[ediff,ediff],'b')
+        analytic, = plt.plot([0,max(lat_time2_hold)],[ediff,ediff],'b')
+        plt.legend([fit, analytic], ['Fitted line', 'Analytical'])
         plt.show()
 
         done=input("Enter 'y' if you are happy with your fit, if not enter 'n'")
         time.sleep(0.1)
     
     
-    
+    perr=np.sqrt(np.diag(pcov))
+    g.write(str(popt[0]) + '\t' + str(perr[0]))
+    g.close()
 
 num_config=int(sys.argv[1])
 num_lat_points=int(sys.argv[2])

@@ -165,8 +165,9 @@ def fee(num_config,num_lat_points,lattice_spacing,corr_dist,bootstraps,mass,spri
         done=input("Enter 'y' if you are happy with your fit, if not enter 'n'")
         time.sleep(0.1)
     perr=np.sqrt(np.diag(pcov))
+    
     g=open('info'+name+'.txt', 'a')
-    g.write(str( (spring_const**2/(4*mass))**0.5 + popt[0]) + '\t' + str(perr[0]) + '\n')
+    g.write(str(popt[0]) + '\t' + str(perr[0]))
     g.close()
         
 num_config=int(sys.argv[1])
