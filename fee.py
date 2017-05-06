@@ -139,10 +139,11 @@ def fee(num_config,num_lat_points,lattice_spacing,corr_dist,bootstraps,mass,spri
     plt.plot([0,max(lat_time2)],[ediff,ediff],'b')
     plt.show()
 
-    done='n'
-    while done=='n':
+    done='something'
+    plateau=int(input("Enter the point where the plateau occurs: "))
+    while done!='y':
     
-        plateau=int(input("Enter the point where the plateau occurs: "))
+        
         effe_hold=effe[0:plateau]
         lat_time2_hold=lat_time2[0:plateau]
         y_error_hold=y_error[0:plateau]
@@ -162,7 +163,12 @@ def fee(num_config,num_lat_points,lattice_spacing,corr_dist,bootstraps,mass,spri
         plt.legend([fit, analyitic], ['Fitted line', 'Analytical'])
         plt.show()
 
-        done=input("Enter 'y' if you are happy with your fit, if not enter 'n'")
+        done=input("Enter 'y' if you are happy with your fit, if not enter a new value for the plateau")
+        if done != 'y':
+            plateau=int(eval(done))
+        else:
+            pass
+        
         time.sleep(0.1)
     perr=np.sqrt(np.diag(pcov))
     
