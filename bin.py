@@ -52,8 +52,12 @@ def corr(spring_const,mass,lattice_spacing,num_config,num_lat_points):
     plt.savefig('corr_t'+name+'.pdf')
     
     print("Correlation time determined.")
+    size_of_bin=int(1/popt[1] + 1)
+    g=open('info'+name+'.txt', 'w')
+    g.write(str(size_of_bin) + '\n')
+    g.close()
     
-    return (popt, data)
+    return (data, size_of_bin)
 
 def binning(spring_const,mass,lattice_spacing,num_config,num_lat_points,size_of_bin,raw_data):
     mu=spring_const
@@ -76,9 +80,7 @@ def binning(spring_const,mass,lattice_spacing,num_config,num_lat_points,size_of_
     data=raw_data
     
     bin_size=size_of_bin
-    num_bins=int(len(data)/(bin_size*points))
-    ppdensity=[0]
-    npdensity=[0]
+    num_bins=int(niter/bin_size)
         
     f=open('2binned_data'+name+'.txt' , 'w')
     x=0
@@ -111,7 +113,5 @@ mu=float(sys.argv[6])
 
 
 array=corr(mu,mass,a,num_config,num_lat_points)
-size_of_bin=int(1/array[0][1] + 1)
-print(size_of_bin)
-binning(mu,mass,a,num_config,num_lat_points,size_of_bin,array[1])
+binning(mu,mass,a,num_config,num_lat_points,array[1],array[0])
 

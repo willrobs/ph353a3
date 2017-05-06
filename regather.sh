@@ -11,7 +11,7 @@ corrdist=500
 bootsamp=75
 eecorrdist=15
 
-for mu in {5..40..5}
+for mu in {15..15..5}
   do
 
     python data.py $niter $points $a $step $ttime $mass $mu $anharm

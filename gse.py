@@ -54,6 +54,12 @@ def bootstrap(spring_const,mass,lattice_spacing,num_config,num_lat_points,num_bo
     print('Internal energy: ' ,menergy)
     print('error: ',std)
     
+    g=open('info'+name+'.txt', 'a')
+    g.write('col1' + '\t' + 'col2' + '\n')
+    g.write(str(menergy) + '\t' + str(std) + '\n')
+    g.close()
+    
+    
 num_config=int(sys.argv[1])
 num_lat_points=int(sys.argv[2])
 a=float(sys.argv[3])

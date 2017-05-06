@@ -261,12 +261,41 @@ num_lat_points=int(sys.argv[2])
 lattice_spacing=float(sys.argv[3])
 corrt=int(sys.argv[4]) #### distance in fee calculation
 bootstraps=int(sys.argv[5])
-mass_prime=float(sys.argv[6])
-spring_const_prime=float(sys.argv[7])
+mu_interval=float(sys.argv[6])
+mu_upp_lim=float(sys.argv[7])
+mu_low_lim=float(sys.argv[8])
 
-m=float(sys.argv[8])
-mu=float(sys.argv[9])
+m=float(sys.argv[9])
+mu=float(sys.argv[10])
+mass_prime=m
+spring_const_prime=mu
+
+mu_upi=int(mu_upp_lim/mu_interval) ####upper limit on iterations
+mu_loi=int(mu_low_lim/mu_interval)
+
+for d in range(mu_upi):
+    spring_const_prime=mu+(d+1)*mu_interval
+    
+    reweighting(mu,m,lattice_spacing,num_config,num_lat_points,mass_prime,spring_const_prime,corrt,bootstraps)
+                    
+                                           
 
 
 
-reweighting(mu,m,lattice_spacing,num_config,num_lat_points,mass_prime,spring_const_prime,corrt,bootstraps)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

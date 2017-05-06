@@ -45,7 +45,7 @@ def probd(spring_const,mass,lattice_spacing,num_config,num_lat_points,d_volume,p
     
         for n in range(points): ############################## Poss change
 
-            dp=eval(data[n + m*bin_size*points])
+            dp=eval(data[n + m*points])
             ## Determining Probability density
 
             if dp >= 0:
