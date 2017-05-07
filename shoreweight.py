@@ -285,6 +285,7 @@ for d in range(mu_upi):
 for d in range(mu_loi):
     spring_const_prime=mu -(d+1)*mu_interval
     
+    reweighting(mu,m,lattice_spacing,num_config,num_lat_points,mass_prime,spring_const_prime,corrt,bootstraps)
     
 m_upi=int(m_upp_lim/m_interval)
 m_loi=int(m_low_lim/m_interval)
